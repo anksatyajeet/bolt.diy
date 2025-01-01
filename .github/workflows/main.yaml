@@ -1,32 +1,35 @@
 name: Setup and Build
-description: Generic setup action
-inputs:
-  pnpm-version:
-    required: false
-    type: string
-    default: '9.4.0'
-  node-version:
-    required: false
-    type: string
-    default: '20.15.1'
 
-runs:
-  using: composite
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
 
-  steps:
-    - uses: pnpm/action-setup@v4
-      with:
-        version: ${{ inputs.pnpm-version }}
-        run_install: false
+jobs:
+  build:
+    name: Setup and Build
+    runs-on: ubuntu-latest
 
-    - name: Set Node.js version to ${{ inputs.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ inputs.node-version }}
-        cache: pnpm
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
 
-    - name: Install dependencies and build project
-      shell: bash
-      run: |
-        pnpm install
-        pnpm run build
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '9.4.0'
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.15.1'
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build project
+        run: pnpm run build
